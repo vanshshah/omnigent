@@ -20,6 +20,11 @@ Omnigent is an open-source **AI agent framework** and meta-harness that gives yo
 
 ---
 
+> [!NOTE]
+> 🍴 This is a customized fork of [omnigent-ai/omnigent](https://github.com/omnigent-ai/omnigent), maintained by [@vanshshah](https://github.com/vanshshah) — it adds a `skyline` data-analyst agent and a reusable house-guardrails policy. See **[FORK.md](FORK.md)** for what it changes and how it tracks upstream.
+
+---
+
 ## Why Omnigent?
 
 Omnigent lets you:
