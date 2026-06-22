@@ -36,3 +36,10 @@ skyline runs with local OS tools but a deliberately tight sandbox:
 - **no network** — this agent reads local data, it does not phone home.
 - **platform-default sandbox** — `darwin_seatbelt` on macOS, `linux_bwrap` on
   Linux (the `sandbox.type` is left unset on purpose so one file works on both).
+
+Layered on top of that is a set of house guardrails — see
+[`guardrails.yaml`](guardrails.yaml) — that ask before any real-world side
+effect, hard-cap tool calls against a runaway loop, and downgrade off expensive
+models past a spend threshold. They're declared inline in
+[`config.yaml`](config.yaml); `guardrails.yaml` is the standalone, paste-into-
+any-agent copy.

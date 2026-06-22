@@ -1,0 +1,38 @@
+# skyline-guard — my house guardrails.
+#
+# A small, reusable policy bundle that encodes a personal risk posture: pause
+# before real-world side effects, never let a loop run away, and don't burn
+# money silently on an expensive model. Paste the `policies:` block below under
+# any agent's `policies:` (it's already declared inline in this agent's
+# config.yaml).
+#
+# Every handler here is a REGISTERED builtin (omnigent.policies.builtins.*), so
+# the bundle loads from an agent spec with no server-side `policy_modules:`
+# allow-listing. See docs/POLICIES.md for the full catalog and trust model.
+
+policies:
+  # 1. Pause for me before any real-world side effect. ASKs before
+  #    sys_os_read / sys_os_write / sys_os_edit / sys_os_shell so I approve the
+  #    first time an agent reaches for the filesystem or a shell.
+  approve_os_ops:
+    type: function
+    handler: omnigent.policies.builtins.safety.ask_on_os_tools
+
+  # 2. Backstop against a runaway loop — a hard DENY once the session crosses
+  #    the tool-call ceiling. A stuck agent stops instead of spinning.
+  cap_tool_calls:
+    type: function
+    handler: omnigent.policies.builtins.safety.max_tool_calls_per_session
+    factory_params:
+      limit: 80
+
+  # 3. Spend gate. ASK at $2 and $4 the first time each is crossed, then past
+  #    $5 stop running expensive models — DENY tool calls while the session is
+  #    on opus / gpt-5.5 so I downgrade (`/model`) instead of bleeding cost.
+  cap_spend:
+    type: function
+    handler: omnigent.policies.builtins.cost.cost_budget
+    factory_params:
+      max_cost_usd: 5.00
+      ask_thresholds_usd: [2.00, 4.00]
+      expensive_models: ["opus", "gpt-5.5"]

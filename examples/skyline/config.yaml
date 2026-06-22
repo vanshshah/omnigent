@@ -70,6 +70,29 @@ prompt: |
 async: true
 cancellable: true
 
+# House guardrails (skyline-guard) — see guardrails.yaml for the standalone,
+# paste-anywhere copy. Every handler is a registered builtin, so this loads
+# with no server-side policy_modules allow-listing.
+policies:
+  # Pause for me before any real-world side effect (sys_os_read/write/edit/shell).
+  approve_os_ops:
+    type: function
+    handler: omnigent.policies.builtins.safety.ask_on_os_tools
+  # Backstop against a runaway loop — hard DENY past the ceiling.
+  cap_tool_calls:
+    type: function
+    handler: omnigent.policies.builtins.safety.max_tool_calls_per_session
+    factory_params:
+      limit: 80
+  # Spend gate — ASK at $2 / $4, then downgrade off expensive models past $5.
+  cap_spend:
+    type: function
+    handler: omnigent.policies.builtins.cost.cost_budget
+    factory_params:
+      max_cost_usd: 5.00
+      ask_thresholds_usd: [2.00, 4.00]
+      expensive_models: ["opus", "gpt-5.5"]
+
 # Local OS access so skyline can inspect files with the built-in sys_os_read /
 # sys_os_shell tools. The sandbox type is omitted on purpose, so Omnigent picks
 # the platform default (darwin_seatbelt on macOS, linux_bwrap on Linux) and the
